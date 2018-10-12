@@ -24,7 +24,7 @@ headers = {
 
 for event in notifier.event_gen():
     if event is not None:
-        if 'IN_CLOSE_WRITE' in event[1] and EXTENSION in event[3]:
+        if 'IN_CREATE' in event[1] and EXTENSION in event[3]:
             url1 = 'http://{}/login.fcgi'.format(DEVICE_IP)
             response = requests.request("POST", url1, data=payload, headers=headers)
             session = json.loads(response.text)['session']
