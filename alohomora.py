@@ -1,8 +1,6 @@
 import inotify.adapters
-import json
 import os
 import requests
-import telebot
 
 FOLDER = os.getenv('FOLDER', '/tmp/')
 EXTENSION = os.getenv('EXTENSION', 'mp4')
@@ -12,21 +10,25 @@ PASSWORD = os.getenv('PASSWORD')
 
 notifier = inotify.adapters.InotifyTree(FOLDER)
 
-data = f'\n\t\n\t\"login\":\"{LOGIN}\",\n\t\"password\":\"{PASSWORD}\"\n\t\n'
-payload = '{' + data + '}'
-payload2 = ("{\n\t\"actions\":[{"
-    + "\n\t\t\"action\":\"sec_box\","
-    + "\n\t\t\"parameters\":\"id=65793,reason=3\"\n\t\n}]}"
-)
-headers = {
-    'content-type': "application/json"
+login_payload = {
+    'login': LOGIN,
+    'password': PASSWORD,
+}
+sec_box_payload = {
+    'actions': [{
+        'action': 'sec_box',
+        'parameters': 'id=65793,reason=3',
+    }]
 }
 
 for event in notifier.event_gen():
-    if event is not None:
-        if 'IN_CREATE' in event[1] and EXTENSION in event[3]:
-            url1 = 'http://{}/login.fcgi'.format(DEVICE_IP)
-            response = requests.request("POST", url1, data=payload, headers=headers)
-            session = json.loads(response.text)['session']
-            url2 = "http://{}/execute_actions.fcgi?session={}".format(DEVICE_IP, session)
-            response = requests.request("POST", url2, data=payload2, headers=headers)
+    if not event:
+        continue
+        
+    if 'IN_CREATE' in event[1] and EXTENSION in event[3]:
+        login_url = f'http://{DEVICE_IP}/login.fcgi'
+        response = requests.post(login_url, json=login_payload)
+        session = response.json()['session']
+        
+        actions_url = f'http://{DEVICE_IP}/execute_actions.fcgi?session={session}'
+        response = requests.post(actions_url, json=sec_box_payload)
