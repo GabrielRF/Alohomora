@@ -5,7 +5,7 @@ import requests
 FOLDER = os.getenv('FOLDER', '/tmp/')
 EXTENSION = os.getenv('EXTENSION', 'mp4')
 DEVICE_IP = os.getenv('DEVICE_IP')
-LOGIN = os.getenv('LOGIN', 'mp4')
+LOGIN = os.getenv('LOGIN', 'admin')
 PASSWORD = os.getenv('PASSWORD')
 
 notifier = inotify.adapters.InotifyTree(FOLDER)
